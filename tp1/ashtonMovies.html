@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Ashton Kutcher's movies</title>
+</head>
+<body>
+    <script src="ashtonMoview.js"></script>
+    <div>
+        <p>Movies</p>
+            <table width="70%" id="innerTable">
+                <tr>
+                    <td>Name</td>
+
+
+                </tr>
+            </table>
+    </div>
+    <script type="text/javascript">
+        var query = "PREFIX dbp:    <http://dbpedia.org/property/>" +
+                    "select ?s where { ?s dbp:starring ?o}" ;
+        var url = "http://dydra.com/julietapuente/ontologias-web/sparql?query=";
+        url += encodeURIComponent(query);
+        $.ajax({
+            dataType: 'json',
+            url: url,
+            success: function(data) {
+                data.results.bindings.forEach(function(entry){
+                    var existsQuery = "PREFIX nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>"+
+                            "select * where {  graph <http://example.org/favourited> { <" +
+                            entry.s.value+ "> nao:favouritedBy ?o}}";
+                    var existsUrl = "http://dydra.com/julietapuente/ontologias-web/sparql?query=";
+                    existsUrl+=encodeURIComponent(existsQuery);
+                    $.ajax({
+                        dataType: 'json',
+                        url:existsUrl,
+                        success: function (res) {
+                            if(res.results.bindings.length != 0){
+                                $("#innerTable").append("<tr><td>" + entry.s.value + "</td><td><button onclick='unfavourite(\"" + entry.s.value + "\")'>Unfavourite</button></tr>");
+                            } else {
+                                $("#innerTable").append("<tr><td>" + entry.s.value + "</td><td><button onclick='favourite(\"" + entry.s.value + "\")'>Favourite</button></td></tr>");
+                            }
+                        }
+                    });
+
+                });
+            }
+        });
+
+
+        //query para favoritear una peli
+        var insertQuery = "PREFIX nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>"+
+                          "INSERT DATA" +
+                          "{ GRAPH <http://example.org/favourited> { <http://dbpedia.org/resource/Two_and_a_Half_Men>  nao:favouritedBy  'User' } }";
+
+        var existsQuery = "PREFIX nao: <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#>"+
+                          "select * where {  graph <http://example.org/favourited> {?s nao:favouritedBy ?o}}";
+
+    </script>
+</body>
+</html>
+
+
+
